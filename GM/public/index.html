@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GESTION GamesMaster</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--primary:#6c5ce7;--primary-light:#a29bfe;--secondary:#fd79a8;--accent:#fdcb6e;--success:#00b894;--danger:#d63031;--blue-gold:#78dbff;--dark:#2d3436;--darker:#1e272e;--light:#f5f6fa;--lighter:#b2bec3;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:linear-gradient(135deg,#1e272e 0%,#2d3436 100%);color:var(--light);min-height:100vh;}
+.container{padding:2rem;max-width:1800px;margin:0 auto;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
+.header h1{color:var(--primary-light);font-size:2rem;display:flex;align-items:center;gap:.8rem;}
+.btn{padding:.65rem 1.3rem;border-radius:50px;border:none;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s;font-size:.9rem;font-family:'Poppins',sans-serif;}
+.btn:hover{transform:translateY(-2px);opacity:.9;}
+.btn-primary{background:linear-gradient(45deg,var(--primary),var(--primary-light));color:white;}
+.btn-outline{background:transparent;border:2px solid var(--primary);color:var(--primary-light);}
+.btn-success{background:var(--success);color:white;}
+.btn-danger{background:var(--danger);color:white;}
+.btn-warning{background:var(--accent);color:#2d3436;}
+.btn-sm{padding:.35rem .75rem;font-size:.8rem;}
+.tabs{display:flex;gap:.5rem;margin-bottom:2rem;flex-wrap:wrap;background:rgba(255,255,255,.03);padding:.5rem;border-radius:12px;}
+.tab{padding:.65rem 1.3rem;border-radius:8px;cursor:pointer;transition:all .2s;font-weight:500;color:var(--lighter);border:none;background:none;font-family:'Poppins',sans-serif;font-size:.9rem;}
+.tab:hover{background:rgba(108,92,231,.15);color:var(--light);}
+.tab.active{background:var(--primary);color:white;}
+.card{background:rgba(255,255,255,.04);border-radius:16px;padding:1.8rem;margin-bottom:1.5rem;border:1px solid rgba(255,255,255,.07);}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;}
+.card-title{font-size:1.2rem;font-weight:600;display:flex;align-items:center;gap:.6rem;}
+.card-title i{color:var(--primary-light);}
+.filters{display:grid;grid-template-columns:1fr 200px;gap:1rem;margin-bottom:1.5rem;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem;}
+.stat-card{background:rgba(108,92,231,.1);padding:1.2rem;border-radius:12px;text-align:center;border:1px solid rgba(108,92,231,.2);}
+.stat-value{font-size:1.8rem;font-weight:700;color:var(--primary-light);}
+.stat-label{color:var(--lighter);font-size:.85rem;margin-top:.3rem;}
+.chart-wrap{background:rgba(255,255,255,.02);border-radius:12px;padding:1.5rem;height:320px;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th,td{padding:.9rem 1rem;text-align:center;border-bottom:1px solid rgba(255,255,255,.06);}
+th{background:rgba(255,255,255,.03);color:var(--lighter);font-weight:500;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;}
+tr:hover td{background:rgba(108,92,231,.06);}
+.badge{padding:.3rem .8rem;border-radius:50px;font-size:.78rem;font-weight:500;}
+.badge-actif{background:rgba(0,184,148,.2);color:#00b894;}
+.badge-inactif{background:rgba(214,48,49,.2);color:#d63031;}
+.badge-surveillance{background:rgba(253,203,110,.2);color:#fdcb6e;}
+.badge-dissous{background:rgba(178,190,195,.2);color:#b2bec3;}
+.badge-pending{background:rgba(253,203,110,.2);color:#fdcb6e;}
+.badge-approved{background:rgba(0,184,148,.2);color:#00b894;}
+.badge-rejected{background:rgba(214,48,49,.2);color:#d63031;}
+.gold-y{color:var(--accent);font-weight:600;display:inline;}
+.gold-b{color:var(--blue-gold);font-weight:600;display:inline;}
+.act{display:flex;gap:.4rem;flex-wrap:wrap;}
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;}
+.note-card{background:rgba(253,121,168,.07);border-left:4px solid var(--secondary);padding:1rem;border-radius:10px;}
+.note-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;}
+.note-group{font-weight:600;color:var(--secondary);}
+.note-date{font-size:.75rem;color:var(--lighter);}
+.note-text{font-size:.88rem;color:var(--lighter);line-height:1.5;}
+.rev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem;}
+.rev-card{background:rgba(120,219,255,.05);border-left:4px solid var(--blue-gold);padding:1.4rem;border-radius:12px;border:1px solid rgba(120,219,255,.1);transition:all .2s;}
+.rev-card:hover{transform:translateY(-2px);}
+.rev-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem;gap:.5rem;}
+.rev-title{font-weight:700;font-size:1.05rem;color:var(--light);}
+.rev-text{font-size:.87rem;color:var(--lighter);line-height:1.6;margin-bottom:1rem;}
+.rev-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;}
+.rev-date{font-size:.75rem;color:var(--lighter);}
+.rev-group-badge{background:rgba(108,92,231,.2);padding:.3rem .7rem;border-radius:6px;font-size:.75rem;color:var(--primary-light);font-weight:500;}
+.rev-filters{display:grid;grid-template-columns:1fr;gap:1rem;margin-bottom:1.5rem;}
+.ranking-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem;}
+.ranking-card{background:rgba(255,255,255,.03);border-radius:14px;padding:1.5rem;border:1px solid rgba(255,255,255,.06);}
+.rank-title{font-size:1rem;font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+.rank-title.gold{color:var(--accent);}
+.rank-title.blue{color:var(--blue-gold);}
+.rank-item{display:flex;align-items:center;justify-content:space-between;padding:.7rem .9rem;margin-bottom:.5rem;border-radius:10px;background:rgba(0,0,0,.2);transition:all .2s;}
+.rank-item:hover{background:rgba(108,92,231,.12);transform:translateX(4px);}
+.rank-left{display:flex;align-items:center;gap:.8rem;}
+.rank-pos{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;background:rgba(255,255,255,.06);color:var(--lighter);}
+.rank-pos.p1{background:linear-gradient(45deg,#FFD700,#FFA500);color:#2d3436;}
+.rank-pos.p2{background:linear-gradient(45deg,#C0C0C0,#A0A0A0);color:#2d3436;}
+.rank-pos.p3{background:linear-gradient(45deg,#CD7F32,#8B4513);color:white;}
+.rank-name{font-weight:500;font-size:.9rem;}
+.rank-type{font-size:.75rem;color:var(--lighter);}
+.rank-val{font-weight:700;font-size:.95rem;}
+.rank-val.gold{color:var(--accent);}
+.rank-val.blue{color:var(--blue-gold);}
+.empty{text-align:center;padding:3rem;color:var(--lighter);}
+.empty i{font-size:3rem;margin-bottom:1rem;opacity:.3;display:block;}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;overflow-y:auto;padding:3rem 1rem;justify-content:center;align-items:flex-start;}
+.modal.show{display:flex;}
+.modal-box{background:linear-gradient(135deg,#2d3436,#1e272e);border-radius:16px;padding:2rem;width:100%;max-width:560px;border:1px solid rgba(108,92,231,.3);box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,.08);}
+.modal-title{font-size:1.3rem;color:var(--primary-light);font-weight:600;}
+.close-x{background:none;border:none;color:var(--lighter);font-size:1.6rem;cursor:pointer;line-height:1;}
+.close-x:hover{color:var(--light);}
+.fg{margin-bottom:1.1rem;}
+.fl{display:block;margin-bottom:.45rem;color:var(--lighter);font-size:.88rem;font-weight:500;}
+.fc{width:100%;padding:.75rem 1rem;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(30,39,46,.8);color:var(--light);font-size:.9rem;transition:all .2s;font-family:'Poppins',sans-serif;}
+.fc:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,92,231,.2);}
+select.fc option{background:#2d3436;color:var(--light);}
+textarea.fc{min-height:120px;resize:vertical;}
+.form-act{display:flex;justify-content:flex-end;gap:.8rem;margin-top:1.5rem;}
+.mc{display:flex;align-items:center;gap:.6rem;}
+.mb{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:var(--light);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s;}
+.mb:hover{background:rgba(108,92,231,.4);}
+.mv{font-weight:700;min-width:35px;text-align:center;font-size:1.1rem;}
+@media(max-width:768px){.container{padding:1rem;}.filters{grid-template-columns:1fr;}.ranking-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="container"><div class="header">
+  <h1><i class="fas fa-crown"></i> GESTION GamesMaster</h1>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('groups')"><i class="fas fa-users"></i> Groupes</button>
+  <button class="tab" onclick="showTab('notes')"><i class="fas fa-sticky-note"></i> Notes</button>
+  <button class="tab" onclick="showTab('gives')"><i class="fas fa-gift"></i> Demandes</button>
+  <button class="tab" onclick="showTab('missions')"><i class="fas fa-trophy"></i> Missions</button>
+  <button class="tab" onclick="showTab('stats')"><i class="fas fa-chart-pie"></i> Statistiques</button>
+  <button class="tab" onclick="showTab('revs')"><i class="fas fa-flag"></i> Revendications</button>
+</div>
+
+<!-- GROUPS -->
+<div id="tab-groups">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-users"></i> Liste des Groupes</div>
+      <button class="btn btn-primary" onclick="openAddGroup()"><i class="fas fa-plus"></i> Nouveau Groupe</button>
+    </div>
+    <div class="filters">
+      <input type="text" id="search-group" class="fc" placeholder="🔍 Rechercher..." oninput="renderGroups()">
+      <select id="filter-type" class="fc" onchange="renderGroups()">
+        <option value="">Tous les types</option>
+        <option value="orga">Orga</option>
+        <option value="gang">Gang</option>
+        <option value="pf-offi">PF Offi</option>
+        <option value="pf-inde">PF Inde</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>NOM</th><th>TYPE</th><th>STATUT</th><th>OR</th><th>MISSIONS</th><th>COORDONNÉES</th><th>ACTIONS</th></tr></thead>
+        <tbody id="groups-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- NOTES -->
+<div id="tab-notes" style="display:none">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-sticky-note"></i> Notes</div>
+      <button class="btn btn-primary" onclick="openAddNote()"><i class="fas fa-plus"></i> Nouvelle Note</button>
+    </div>
+    <div class="notes-grid" id="notes-grid"></div>
+  </div>
+</div>
+
+<!-- GIVES -->
+<div id="tab-gives" style="display:none">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-gift"></i> Demandes de Give</div>
+      <button class="btn btn-primary" onclick="openAddGive()"><i class="fas fa-plus"></i> Nouvelle Demande</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Groupe</th><th>Montant</th><th>Commandes</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="gives-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MISSIONS -->
+<div id="tab-missions" style="display:none">
+  <div class="card">
+    <div class="card-header"><div class="card-title"><i class="fas fa-trophy"></i> Suivi des Missions</div></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value" id="m-total">0</div><div class="stat-label">Total Missions</div></div>
+      <div class="stat-card"><div class="stat-value" id="m-top">-</div><div class="stat-label">Groupe le + actif</div></div>
+      <div class="stat-card"><div class="stat-value" id="m-avg">0</div><div class="stat-label">Moyenne / Groupe</div></div>
+    </div>
+    <div class="chart-wrap"><canvas id="missionsChart"></canvas></div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div id="tab-stats" style="display:none">
+  <div class="card">
+    <div class="card-header"><div class="card-title"><i class="fas fa-chart-pie"></i> Statistiques</div></div>
+    <div class="ranking-grid">
+      <div class="ranking-card">
+        <div class="rank-title gold"><i class="fas fa-coins"></i> Top Or Rouge 🔴</div>
+        <div id="rank-gold"></div>
+      </div>
+      <div class="ranking-card">
+        <div class="rank-title blue"><i class="fas fa-gem"></i> Top Or Bleu 🔵</div>
+        <div id="rank-blue"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REVENDICATIONS -->
+<div id="tab-revs" style="display:none">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-flag"></i> Revendications</div>
+      <button class="btn btn-primary" onclick="openAddRev()"><i class="fas fa-plus"></i> Nouvelle Revendication</button>
+    </div>
+    <div class="rev-filters">
+      <input type="text" id="search-rev" class="fc" placeholder="🔍 Rechercher une revendication..." oninput="renderRevs()">
+    </div>
+    <div class="rev-grid" id="rev-grid"></div>
+  </div>
+</div>
+
+</div>
+
+<!-- MODAL ADD GROUP -->
+<div id="modal-add-group" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title"><i class="fas fa-users"></i> Nouveau Groupe</div>
+      <button class="close-x" onclick="closeModal('modal-add-group')">×</button>
+    </div>
+    <div class="fg"><label class="fl">Nom du groupe *</label><input type="text" id="ag-name" class="fc"></div>
+    <div class="fg"><label class="fl">Type *</label>
+      <select id="ag-type" class="fc" onchange="toggleBlue('ag-blue-wrap',this.value)">
+        <option value="">-- Sélectionner --</option>
+        <option value="orga">Orga</option>
+        <option value="gang">Gang</option>
+        <option value="pf-offi">PF Offi</option>
+        <option value="pf-inde">PF Inde</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Statut</label>
+      <select id="ag-status" class="fc">
+        <option value="actif">Actif</option>
+        <option value="inactif">Inactif</option>
+        <option value="surveillance">Surveillance</option>
+        <option value="dissous">Dissous</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Or Rouge 🔴</label><input type="number" id="ag-gold" class="fc" value="0" min="0"></div>
+    <div id="ag-blue-wrap" style="display:none" class="fg"><label class="fl">Or Bleu 🔵</label><input type="number" id="ag-blue" class="fc" value="0" min="0"></div>
+    <div class="fg"><label class="fl">Missions</label>
+      <div class="mc">
+        <button type="button" class="mb" onclick="changeVal('ag-missions',-1)">−</button>
+        <span class="mv" id="ag-missions">0</span>
+        <button type="button" class="mb" onclick="changeVal('ag-missions',1)">+</button>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Coordonnées</label><input type="text" id="ag-locs" class="fc"></div>
+    <div class="form-act">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-group')">Annuler</button>
+      <button class="btn btn-primary" onclick="addGroup()"><i class="fas fa-save"></i> Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT GROUP -->
+<div id="modal-edit-group" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title"><i class="fas fa-users"></i> Modifier Groupe</div>
+      <button class="close-x" onclick="closeModal('modal-edit-group')">×</button>
+    </div>
+    <input type="hidden" id="eg-id">
+    <div class="fg"><label class="fl">Nom du groupe *</label><input type="text" id="eg-name" class="fc"></div>
+    <div class="fg"><label class="fl">Type *</label>
+      <select id="eg-type" class="fc" onchange="toggleBlue('eg-blue-wrap',this.value)">
+        <option value="">-- Sélectionner --</option>
+        <option value="orga">Orga</option>
+        <option value="gang">Gang</option>
+        <option value="pf-offi">PF Offi</option>
+        <option value="pf-inde">PF Inde</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Statut</label>
+      <select id="eg-status" class="fc">
+        <option value="actif">Actif</option>
+        <option value="inactif">Inactif</option>
+        <option value="surveillance">Surveillance</option>
+        <option value="dissous">Dissous</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Or Rouge 🔴</label><input type="number" id="eg-gold" class="fc" value="0" min="0"></div>
+    <div id="eg-blue-wrap" style="display:none" class="fg"><label class="fl">Or Bleu 🔵</label><input type="number" id="eg-blue" class="fc" value="0" min="0"></div>
+    <div class="fg"><label class="fl">Missions</label>
+      <div class="mc">
+        <button type="button" class="mb" onclick="changeVal('eg-missions',-1)">−</button>
+        <span class="mv" id="eg-missions">0</span>
+        <button type="button" class="mb" onclick="changeVal('eg-missions',1)">+</button>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Coordonnées</label><input type="text" id="eg-locs" class="fc"></div>
+    <div class="form-act">
+      <button class="btn btn-outline" onclick="closeModal('modal-edit-group')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveGroup()"><i class="fas fa-save"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADD NOTE -->
+<div id="modal-add-note" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title"><i class="fas fa-sticky-note"></i> Nouvelle Note</div>
+      <button class="close-x" onclick="closeModal('modal-add-note')">×</button>
+    </div>
+    <div class="fg"><label class="fl">Groupe *</label>
+      <select id="an-group" class="fc"></select>
+    </div>
+    <div class="fg"><label class="fl">Note *</label><textarea id="an-text" class="fc" placeholder="Saisissez votre note..."></textarea></div>
+    <div class="form-act">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-note')">Annuler</button>
+      <button class="btn btn-primary" onclick="addNote()"><i class="fas fa-save"></i> Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADD GIVE -->
+<div id="modal-add-give" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title"><i class="fas fa-gift"></i> Nouvelle Demande</div>
+      <button class="close-x" onclick="closeModal('modal-add-give')">×</button>
+    </div>
+    <div class="fg"><label class="fl">Groupe *</label>
+      <select id="agv-group" class="fc"></select>
+    </div>
+    <div class="fg"><label class="fl">Montant</label><input type="number" id="agv-amount" class="fc" value="0" min="0"></div>
+    <div class="fg"><label class="fl">Commandes</label><textarea id="agv-reason" class="fc" placeholder="/giveItem ..."></textarea></div>
+    <div class="form-act">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-give')">Annuler</button>
+      <button class="btn btn-primary" onclick="addGive()"><i class="fas fa-save"></i> Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADD REV -->
+<div id="modal-add-rev" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title"><i class="fas fa-flag"></i> Nouvelle Revendication</div>
+      <button class="close-x" onclick="closeModal('modal-add-rev')">×</button>
+    </div>
+    <div class="fg"><label class="fl">Groupe *</label>
+      <select id="ar-group" class="fc"></select>
+    </div>
+    <div class="fg"><label class="fl">Titre *</label><input type="text" id="ar-title" class="fc" placeholder="Titre de la revendication"></div>
+    <div class="fg"><label class="fl">Description *</label><textarea id="ar-content" class="fc" placeholder="Décrivez la revendication..."></textarea></div>
+    <div class="form-act">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-rev')">Annuler</button>
+      <button class="btn btn-primary" onclick="addRev()"><i class="fas fa-save"></i> Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT REV -->
+<div id="modal-edit-rev" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title"><i class="fas fa-flag"></i> Modifier Revendication</div>
+      <button class="close-x" onclick="closeModal('modal-edit-rev')">×</button>
+    </div>
+    <input type="hidden" id="er-id">
+    <div class="fg"><label class="fl">Groupe *</label>
+      <select id="er-group" class="fc"></select>
+    </div>
+    <div class="fg"><label class="fl">Titre *</label><input type="text" id="er-title" class="fc"></div>
+    <div class="fg"><label class="fl">Description *</label><textarea id="er-content" class="fc"></textarea></div>
+    <div class="form-act">
+      <button class="btn btn-outline" onclick="closeModal('modal-edit-rev')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveRev()"><i class="fas fa-save"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var groups=[],notes=[],gives=[],revs=[];
+function load(){
+  var g=localStorage.getItem('gm_groups');
+  var n=localStorage.getItem('gm_notes');
+  var gi=localStorage.getItem('gm_gives');
+  var r=localStorage.getItem('gm_revs');
+  groups=g?JSON.parse(g):[];
+  notes=n?JSON.parse(n):[];
+  gives=gi?JSON.parse(gi):[];
+  revs=r?JSON.parse(r):[];
+}
+function save(){
+  localStorage.setItem('gm_groups',JSON.stringify(groups));
+  localStorage.setItem('gm_notes', JSON.stringify(notes));
+  localStorage.setItem('gm_gives', JSON.stringify(gives));
+  localStorage.setItem('gm_revs',  JSON.stringify(revs));
+}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+function isPF(t){return t==='pf-offi'||t==='pf-inde';}
+function tLabel(t){return{'orga':'Orga','gang':'Gang','pf-offi':'PF Offi','pf-inde':'PF Inde'}[t]||'Inconnu';}
+function sLabel(s){return{'actif':'Actif','inactif':'Inactif','surveillance':'Surveillance','dissous':'Dissous'}[s]||'Actif';}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function notify(msg,type){
+  var el=document.createElement('div');
+  var bg=type==='error'?'linear-gradient(45deg,#d63031,#ff7675)':'linear-gradient(45deg,#00b894,#55efc4)';
+  el.style.cssText='position:fixed;bottom:20px;right:20px;padding:12px 22px;border-radius:50px;background:'+bg+';color:white;font-weight:500;z-index:99999;box-shadow:0 8px 25px rgba(0,0,0,.3);font-family:Poppins,sans-serif;';
+  el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(function(){el.remove();},2500);
+}
+
+function showTab(name){
+  var all=['groups','notes','gives','missions','stats','revs'];
+  all.forEach(function(t){
+    var el=document.getElementById('tab-'+t);
+    if(el)el.style.display=(t===name)?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach(function(btn,i){
+    btn.classList.toggle('active',all[i]===name);
+  });
+  if(name==='groups')renderGroups();
+  if(name==='notes')renderNotes();
+  if(name==='gives')renderGives();
+  if(name==='missions')renderMissions();
+  if(name==='stats')renderStats();
+  if(name==='revs')renderRevs();
+}
+
+function openModal(id){
+  document.getElementById(id).classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('show');
+  document.body.style.overflow='auto';
+}
+document.querySelectorAll('.modal').forEach(function(m){
+  m.addEventListener('click',function(e){if(e.target===this)closeModal(this.id);});
+});
+
+function toggleBlue(wrapId,type){
+  document.getElementById(wrapId).style.display=isPF(type)?'block':'none';
+}
+function changeVal(id,delta){
+  var el=document.getElementById(id);
+  var v=(parseInt(el.textContent)||0)+delta;
+  if(v<0)v=0;
+  el.textContent=v;
+}
+function fillGroupSelect(id){
+  var sel=document.getElementById(id);
+  sel.innerHTML='<option value="">-- Sélectionner --</option>';
+  groups.forEach(function(g){
+    sel.innerHTML+='<option value="'+g.id+'">'+esc(g.name)+'</option>';
+  });
+}
+
+// ===== GROUPS =====
+function renderGroups(){
+  var search=document.getElementById('search-group').value.toLowerCase();
+  var type=document.getElementById('filter-type').value;
+  var filtered=groups.filter(function(g){
+    return(g.name.toLowerCase().indexOf(search)>-1)&&(!type||g.type===type);
+  });
+  var tbody=document.getElementById('groups-tbody');
+  if(!filtered.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty"><i class="fas fa-users"></i>Aucun groupe</div></td></tr>';return;}
+  tbody.innerHTML=filtered.map(function(g){
+    var orDisplay='';
+    if(g.gold||0>0){orDisplay+='<span class="gold-y">⭕ '+(g.gold||0).toLocaleString()+'</span> ';}
+    if(isPF(g.type)&&(g.blueGold||0)>0){orDisplay+='<span class="gold-b">💎 '+(g.blueGold||0).toLocaleString()+'</span>';}
+    return '<tr>'+
+      '<td>'+esc(g.name)+'</td>'+
+      '<td>'+tLabel(g.type)+'</td>'+
+      '<td><span class="badge badge-'+g.status+'">'+sLabel(g.status)+'</span></td>'+
+      '<td>'+orDisplay+'</td>'+
+      '<td>'+(g.missions||0)+'</td>'+
+      '<td>'+(g.locations&&g.locations.length?g.locations.join(', '):'-')+'</td>'+
+      '<td class="act">'+
+        '<button class="btn btn-sm btn-primary" onclick="openEditGroup(\''+g.id+'\')"><i class="fas fa-edit"></i></button>'+
+        '<button class="btn btn-sm btn-danger" onclick="deleteGroup(\''+g.id+'\')"><i class="fas fa-trash"></i></button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function openAddGroup(){
+  document.getElementById('ag-name').value='';
+  document.getElementById('ag-type').value='';
+  document.getElementById('ag-status').value='actif';
+  document.getElementById('ag-gold').value=0;
+  document.getElementById('ag-blue').value=0;
+  document.getElementById('ag-blue-wrap').style.display='none';
+  document.getElementById('ag-missions').textContent=0;
+  document.getElementById('ag-locs').value='';
+  openModal('modal-add-group');
+}
+
+function addGroup(){
+  var name=document.getElementById('ag-name').value.trim();
+  var type=document.getElementById('ag-type').value;
+  var status=document.getElementById('ag-status').value;
+  var gold=parseInt(document.getElementById('ag-gold').value)||0;
+  var blue=parseInt(document.getElementById('ag-blue').value)||0;
+  var missions=parseInt(document.getElementById('ag-missions').textContent)||0;
+  var locs=(document.getElementById('ag-locs').value||'').split(',').map(function(s){return s.trim();}).filter(function(s){return s;});
+  if(!name){notify('Nom requis !','error');return;}
+  if(!type){notify('Type requis !','error');return;}
+  groups.push({id:uid(),name:name,type:type,status:status,gold:gold,blueGold:blue,missions:missions,locations:locs});
+  save();closeModal('modal-add-group');renderGroups();notify('Groupe ajouté !');
+}
+
+function openEditGroup(id){
+  var g=groups.find(function(x){return x.id===id;});
+  if(!g)return;
+  document.getElementById('eg-id').value=id;
+  document.getElementById('eg-name').value=g.name;
+  document.getElementById('eg-type').value=g.type||'';
+  document.getElementById('eg-status').value=g.status||'actif';
+  document.getElementById('eg-gold').value=g.gold||0;
+  document.getElementById('eg-blue').value=g.blueGold||0;
+  document.getElementById('eg-blue-wrap').style.display=isPF(g.type)?'block':'none';
+  document.getElementById('eg-missions').textContent=g.missions||0;
+  document.getElementById('eg-locs').value=(g.locations||[]).join(', ');
+  openModal('modal-edit-group');
+}
+
+function saveGroup(){
+  var id=document.getElementById('eg-id').value;
+  var g=groups.find(function(x){return x.id===id;});
+  if(!g)return;
+  g.name=document.getElementById('eg-name').value.trim();
+  g.type=document.getElementById('eg-type').value;
+  g.status=document.getElementById('eg-status').value;
+  g.gold=parseInt(document.getElementById('eg-gold').value)||0;
+  g.blueGold=parseInt(document.getElementById('eg-blue').value)||0;
+  g.missions=parseInt(document.getElementById('eg-missions').textContent)||0;
+  g.locations=(document.getElementById('eg-locs').value||'').split(',').map(function(s){return s.trim();}).filter(function(s){return s;});
+  save();closeModal('modal-edit-group');renderGroups();notify('Groupe mis à jour !');
+}
+
+function deleteGroup(id){
+  if(!confirm('Supprimer ce groupe ?'))return;
+  groups=groups.filter(function(g){return g.id!==id;});
+  save();renderGroups();notify('Groupe supprimé.');
+}
+
+// ===== NOTES =====
+function renderNotes(){
+  var search=document.getElementById('search-rev')?document.getElementById('search-rev').value.toLowerCase():'';
+  var filtered=notes.filter(function(n){
+    var g=groups.find(function(x){return x.id===n.groupId;});
+    return(g&&g.name.toLowerCase().indexOf(search)>-1)||(n.text.toLowerCase().indexOf(search)>-1);
+  });
+  var grid=document.getElementById('notes-grid');
+  if(!filtered.length){grid.innerHTML='<div class="empty"><i class="fas fa-sticky-note"></i>Aucune note</div>';return;}
+  grid.innerHTML=filtered.map(function(n){
+    var g=groups.find(function(x){return x.id===n.groupId;});
+    return '<div class="note-card"><div class="note-head"><div class="note-group">'+(g?esc(g.name):'-')+'</div><div class="note-date">'+new Date(n.date).toLocaleDateString('fr-FR')+'</div></div><div class="note-text">'+esc(n.text)+'</div><div class="act" style="margin-top:.8rem;"><button class="btn btn-sm btn-primary" onclick="openEditNote(\''+n.id+'\')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="deleteNote(\''+n.id+'\')"><i class="fas fa-trash"></i></button></div></div>';
+  }).join('');
+}
+
+function openAddNote(){
+  fillGroupSelect('an-group');
+  document.getElementById('an-text').value='';
+  openModal('modal-add-note');
+}
+
+function addNote(){
+  var gid=document.getElementById('an-group').value;
+  var text=document.getElementById('an-text').value.trim();
+  if(!gid){notify('Sélectionne un groupe !','error');return;}
+  if(!text){notify('Note requise !','error');return;}
+  notes.push({id:uid(),groupId:gid,text:text,date:new Date().toISOString()});
+  save();closeModal('modal-add-note');renderNotes();notify('Note ajoutée !');
+}
+
+function openEditNote(id){
+  var n=notes.find(function(x){return x.id===id;});
+  if(!n)return;
+  var g=groups.find(function(x){return x.id===n.groupId;});
+  alert('Note: '+n.text+'\nGroupe: '+(g?g.name:'-')+'\n\nLes notes ne peuvent pas être éditées, créez-en une nouvelle.');
+}
+
+function deleteNote(id){
+  if(!confirm('Supprimer cette note ?'))return;
+  notes=notes.filter(function(n){return n.id!==id;});
+  save();renderNotes();notify('Note supprimée.');
+}
+
+// ===== GIVES =====
+function renderGives(){
+  var tbody=document.getElementById('gives-tbody');
+  if(!gives.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty"><i class="fas fa-gift"></i>Aucune demande</div></td></tr>';return;}
+  var sl={pending:'En attente',approved:'Approuvée',rejected:'Rejetée'};
+  tbody.innerHTML=gives.map(function(gv){
+    var g=groups.find(function(x){return x.id===gv.groupId;});
+    return '<tr>'+
+      '<td>'+(g?esc(g.name):'-')+'</td>'+
+      '<td><span class="gold-y">'+(gv.amount||0).toLocaleString()+'</span></td>'+
+      '<td>'+esc(gv.reason)+'</td>'+
+      '<td><span class="badge badge-'+gv.status+'">'+(sl[gv.status]||'?')+'</span></td>'+
+      '<td>'+new Date(gv.date).toLocaleDateString('fr-FR')+'</td>'+
+      '<td class="act">'+
+        (gv.status==='pending'?
+          '<button class="btn btn-sm btn-success" onclick="updateGive(\''+gv.id+'\',\'approved\')"><i class="fas fa-check"></i></button>'+
+          '<button class="btn btn-sm btn-danger" onclick="updateGive(\''+gv.id+'\',\'rejected\')"><i class="fas fa-times"></i></button>':'')+
+        '<button class="btn btn-sm btn-outline" onclick="deleteGive(\''+gv.id+'\')"><i class="fas fa-trash"></i></button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function openAddGive(){
+  fillGroupSelect('agv-group');
+  document.getElementById('agv-amount').value=0;
+  document.getElementById('agv-reason').value='';
+  openModal('modal-add-give');
+}
+
+function addGive(){
+  var gid=document.getElementById('agv-group').value;
+  var amount=parseInt(document.getElementById('agv-amount').value)||0;
+  var reason=document.getElementById('agv-reason').value.trim();
+  if(!gid){notify('Sélectionne un groupe !','error');return;}
+  gives.push({id:uid(),groupId:gid,amount:amount,reason:reason,status:'pending',date:new Date().toISOString()});
+  save();closeModal('modal-add-give');renderGives();notify('Demande ajoutée !');
+}
+
+function updateGive(id,status){
+  var gv=gives.find(function(x){return x.id===id;});
+  if(gv)gv.status=status;
+  save();renderGives();notify('Demande mise à jour !');
+}
+
+function deleteGive(id){
+  if(!confirm('Supprimer cette demande ?'))return;
+  gives=gives.filter(function(g){return g.id!==id;});
+  save();renderGives();notify('Demande supprimée.');
+}
+
+// ===== MISSIONS =====
+var mChart=null;
+function renderMissions(){
+  var total=groups.reduce(function(s,g){return s+(g.missions||0);},0);
+  var top=[...groups].sort(function(a,b){return(b.missions||0)-(a.missions||0);})[0];
+  var avg=groups.length?(total/groups.length).toFixed(1):0;
+  document.getElementById('m-total').textContent=total;
+  document.getElementById('m-top').textContent=(top&&top.missions)?top.name:'-';
+  document.getElementById('m-avg').textContent=avg;
+  var sorted=[...groups].sort(function(a,b){return(b.missions||0)-(a.missions||0);}).slice(0,10);
+  var ctx=document.getElementById('missionsChart').getContext('2d');
+  if(mChart)mChart.destroy();
+  mChart=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:sorted.map(function(g){return g.name;}),
+      datasets:[{label:'Missions',data:sorted.map(function(g){return g.missions||0;}),backgroundColor:'rgba(108,92,231,.7)',borderColor:'#6c5ce7',borderWidth:2,borderRadius:6}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#b2bec3'},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#b2bec3'},grid:{color:'rgba(255,255,255,.05)'}}}}
+  });
+}
+
+// ===== STATS =====
+function renderStats(){
+  renderRankings();
+}
+
+function renderRankings(){
+  var gc=document.getElementById('rank-gold');
+  var sg=[...groups].filter(function(g){return(g.gold||0)>0;}).sort(function(a,b){return(b.gold||0)-(a.gold||0);}).slice(0,10);
+  if(!sg.length){gc.innerHTML='<div class="empty" style="padding:1rem"><i class="fas fa-coins"></i>Aucune donnée</div>';}
+  else{gc.innerHTML=sg.map(function(g,i){return '<div class="rank-item"><div class="rank-left"><div class="rank-pos'+(i===0?' p1':i===1?' p2':i===2?' p3':'')+'">'+( i+1)+'</div><div><div class="rank-name">'+esc(g.name)+'</div><div class="rank-type">'+tLabel(g.type)+'</div></div></div><div class="rank-val gold">⭕ '+(g.gold||0).toLocaleString()+'</div></div>';}).join('');}
+  var bc=document.getElementById('rank-blue');
+  var sb=[...groups].filter(function(g){return isPF(g.type)&&(g.blueGold||0)>0;}).sort(function(a,b){return(b.blueGold||0)-(a.blueGold||0);}).slice(0,10);
+  if(!sb.length){bc.innerHTML='<div class="empty" style="padding:1rem"><i class="fas fa-gem"></i>Aucune donnée</div>';}
+  else{bc.innerHTML=sb.map(function(g,i){return '<div class="rank-item"><div class="rank-left"><div class="rank-pos'+(i===0?' p1':i===1?' p2':i===2?' p3':'')+'">'+( i+1)+'</div><div><div class="rank-name">'+esc(g.name)+'</div><div class="rank-type">'+tLabel(g.type)+'</div></div></div><div class="rank-val blue">💎 '+(g.blueGold||0).toLocaleString()+'</div></div>';}).join('');}
+}
+
+// ===== REVENDICATIONS =====
+function renderRevs(){
+  var search=document.getElementById('search-rev').value.toLowerCase();
+  var filtered=revs.filter(function(r){
+    var g=groups.find(function(x){return x.id===r.groupId;});
+    return(g&&g.name.toLowerCase().indexOf(search)>-1)||(r.title.toLowerCase().indexOf(search)>-1);
+  });
+  var grid=document.getElementById('rev-grid');
+  if(!filtered.length){grid.innerHTML='<div class="empty"><i class="fas fa-flag"></i>Aucune revendication</div>';return;}
+  grid.innerHTML=filtered.map(function(r){
+    var g=groups.find(function(x){return x.id===r.groupId;});
+    return '<div class="rev-card"><div class="rev-head"><div><div class="rev-title">'+esc(r.title)+'</div><div class="rev-group-badge">'+(g?esc(g.name):'-')+'</div></div></div><div class="rev-text">'+esc(r.content)+'</div><div class="rev-footer"><div class="rev-date">'+new Date(r.date).toLocaleDateString('fr-FR')+'</div><div class="act"><button class="btn btn-sm btn-primary" onclick="openEditRev(\''+r.id+'\')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="deleteRev(\''+r.id+'\')"><i class="fas fa-trash"></i></button></div></div></div>';
+  }).join('');
+}
+
+function openAddRev(){
+  fillGroupSelect('ar-group');
+  document.getElementById('ar-title').value='';
+  document.getElementById('ar-content').value='';
+  openModal('modal-add-rev');
+}
+
+function addRev(){
+  var gid=document.getElementById('ar-group').value;
+  var title=document.getElementById('ar-title').value.trim();
+  var content=document.getElementById('ar-content').value.trim();
+  if(!gid){notify('Sélectionne un groupe !','error');return;}
+  if(!title){notify('Titre requis !','error');return;}
+  if(!content){notify('Description requise !','error');return;}
+  revs.push({id:uid(),groupId:gid,title:title,content:content,date:new Date().toISOString()});
+  save();closeModal('modal-add-rev');renderRevs();notify('Revendication ajoutée !');
+}
+
+function openEditRev(id){
+  var r=revs.find(function(x){return x.id===id;});
+  if(!r)return;
+  fillGroupSelect('er-group');
+  document.getElementById('er-id').value=id;
+  document.getElementById('er-group').value=r.groupId;
+  document.getElementById('er-title').value=r.title;
+  document.getElementById('er-content').value=r.content;
+  openModal('modal-edit-rev');
+}
+
+function saveRev(){
+  var id=document.getElementById('er-id').value;
+  var r=revs.find(function(x){return x.id===id;});
+  if(!r)return;
+  r.groupId=document.getElementById('er-group').value;
+  r.title=document.getElementById('er-title').value.trim();
+  r.content=document.getElementById('er-content').value.trim();
+  save();closeModal('modal-edit-rev');renderRevs();notify('Revendication mise à jour !');
+}
+
+function deleteRev(id){
+  if(!confirm('Supprimer cette revendication ?'))return;
+  revs=revs.filter(function(r){return r.id!==id;});
+  save();renderRevs();notify('Revendication supprimée.');
+}
+
+load();
+renderGroups();
+</script>
+</body>
+</html>
+
